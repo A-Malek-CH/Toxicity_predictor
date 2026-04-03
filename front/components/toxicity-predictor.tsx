@@ -25,12 +25,43 @@ export function ToxicityPredictor() {
     setIsLoading(true);
     setHasRunPrediction(true);
 
-    // Simulate API call with delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const prediction = generateDummyPrediction(smiles);
-    setResult(prediction);
-    setIsLoading(false);
+    try {
+      // Fetch molecular properties from our new Flask backend
+      const response = await fetch(`http://localhost:5000/api/molecule/properties?smiles=${encodeURIComponent(smiles)}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch molecular properties');
+      }
+      
+      const propertiesData = await response.json();
+      
+      // We still use dummy data for the ML model predictions (since they aren't built yet)
+      const basePrediction = generateDummyPrediction(smiles);
+      
+      // Override the dummy properties with real data from the backend
+      const prediction = {
+        ...basePrediction,
+        molecularProperties: {
+          molecularWeight: propertiesData.molecularWeight,
+          formula: propertiesData.formula,
+          atomCount: propertiesData.atomCount,
+          hydrogenBondDonors: propertiesData.hydrogenBondDonors,
+          hydrogenBondAcceptors: propertiesData.hydrogenBondAcceptors,
+          logP: propertiesData.logP,
+          // Extract any extra properties if needed in the future
+          ...propertiesData 
+        }
+      };
+      
+      setResult(prediction);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      // Fallback to pure dummy data if backend fails
+      const prediction = generateDummyPrediction(smiles);
+      setResult(prediction);
+    } finally {
+      setIsLoading(false);
+    }
   }, [smiles]);
 
   const handleReset = useCallback(() => {

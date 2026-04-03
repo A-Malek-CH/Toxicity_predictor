@@ -19,45 +19,22 @@ export function MoleculePreview({ smiles, properties }: MoleculePreviewProps) {
         <h3 className="text-2xl font-bold text-white">Molecular Structure</h3>
       </div>
 
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg p-8 flex items-center justify-center min-h-64">
-        <svg viewBox="0 0 400 400" className="w-full h-full max-w-96">
-          {/* Simple benzene ring visualization */}
-          <circle cx="200" cy="200" r="60" fill="none" stroke="#0080ff" strokeWidth="2" opacity="0.5" />
-
-          {/* Hexagon (benzene ring simplified) */}
-          <polygon
-            points="200,140 260,170 260,230 200,260 140,230 140,170"
-            fill="none"
-            stroke="#0080ff"
-            strokeWidth="3"
-            opacity="0.8"
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg p-2 md:p-8 flex items-center justify-center min-h-[300px] overflow-hidden">
+        {/* Load the actual 2D molecule image from the RDKit Python Backend */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          <img 
+            src={`http://localhost:5000/api/molecule/image?smiles=${encodeURIComponent(smiles)}&width=400&height=400`} 
+            alt="Molecular Structure" 
+            className="max-w-full max-h-[350px] object-contain drop-shadow-2xl"
+            onError={(e) => {
+              // Fallback styling if image fails to load
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement?.classList.add('bg-slate-800');
+            }}
           />
-
-          {/* Add atom nodes */}
-          <circle cx="200" cy="140" r="8" fill="#00d4ff" className="animate-pulse" />
-          <circle cx="260" cy="170" r="8" fill="#00d4ff" className="animate-pulse" />
-          <circle cx="260" cy="230" r="8" fill="#00d4ff" className="animate-pulse" />
-          <circle cx="200" cy="260" r="8" fill="#00d4ff" className="animate-pulse" />
-          <circle cx="140" cy="230" r="8" fill="#00d4ff" className="animate-pulse" />
-          <circle cx="140" cy="170" r="8" fill="#00d4ff" className="animate-pulse" />
-
-          {/* Center atom */}
-          <circle cx="200" cy="200" r="6" fill="#b700ff" />
-
-          {/* Electrons orbital */}
-          <circle cx="200" cy="200" r="80" fill="none" stroke="#b700ff" strokeWidth="1" opacity="0.3" strokeDasharray="5,5" />
-
-          {/* Glow effect */}
-          <circle cx="200" cy="200" r="60" fill="none" stroke="#0080ff" strokeWidth="1" opacity="0.2" />
-
-          {/* Labels */}
-          <text x="200" y="330" textAnchor="middle" className="text-sm fill-gray-400" fontSize="14">
-            Molecular Preview
-          </text>
-          <text x="200" y="350" textAnchor="middle" className="text-xs fill-gray-500" fontSize="12">
-            SMILES: {smiles.substring(0, 30)}...
-          </text>
-        </svg>
+          {/* Subtle glow effect behind the image */}
+          <div className="absolute inset-0 bg-blue-500/5 blur-3xl -z-10 rounded-full"></div>
+        </div>
       </div>
 
       <div className="space-y-3 pt-4 border-t border-slate-700">
